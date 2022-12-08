@@ -1,5 +1,7 @@
 package ma.octo.assignement.web;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ma.octo.assignement.domain.Deposit;
 import ma.octo.assignement.domain.Transfer;
 import ma.octo.assignement.dto.DepositDto;
@@ -9,12 +11,7 @@ import ma.octo.assignement.exceptions.SoldeDisponibleInsuffisantException;
 import ma.octo.assignement.exceptions.TransactionException;
 import ma.octo.assignement.mapper.DepositMapper;
 import ma.octo.assignement.mapper.TransferMapper;
-import ma.octo.assignement.service.interfaces.AccountService;
-import ma.octo.assignement.service.interfaces.AuditTransactionService;
 import ma.octo.assignement.service.interfaces.TransactionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,53 +25,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transactions")
+@RequiredArgsConstructor
+@Slf4j
 class TransactionController {
 
 //    public static final int MONTANT_MAXIMAL = 10000;
-    Logger LOGGER = LoggerFactory.getLogger(TransactionController.class);
 
-    private final AuditTransactionService auditTransactionService;
     private final TransactionService transactionService;
-    private final AccountService accountService;
-
-    @Autowired
-    TransactionController(AuditTransactionService auditTransactionService, TransactionService transactionService, AccountService accountService) {
-        this.auditTransactionService = auditTransactionService;
-        this.transactionService = transactionService;
-        this.accountService = accountService;
-    }
-
-
-//    @GetMapping("/listDesTransferts")
-//    List<Transfer> loadAll() {
-//        LOGGER.info("Lister des utilisateurs");
-//        var allTransfer = transactionService.findAllTransfer();
-//        return CollectionUtils.isEmpty(allTransfer) ? allTransfer : null;
-//    }
-
-    // this controller is for transfers not accounts
-    // for listing accounts, use AccountController
-//    @GetMapping("/listOfAccounts")
-//    List<Compte> loadAllCompte() {
-//        List<Compte> all = compteRepository.findAll();
-//
-//        if (CollectionUtils.isEmpty(all)) {
-//            return null;
-//        } else {
-//            return all;
-//        }
-//    }
-
-//    @GetMapping("/lister_utilisateurs")
-//    List<User> loadAllUtilisateur() {
-//        List<User> all = utilisateurRepository.findAll();
-//
-//        if (CollectionUtils.isEmpty(all)) {
-//            return null;
-//        } else {
-//            return all;
-//        }
-//    }
 
     @PostMapping("/transfers")
     @ResponseStatus(HttpStatus.CREATED)
@@ -91,7 +48,6 @@ class TransactionController {
         }
 
         transactionService.doTransfer(transfer);
-
         return TransferMapper.toDto(transfer);
     }
 
@@ -100,9 +56,7 @@ class TransactionController {
     @ResponseStatus(HttpStatus.CREATED)
     public void createDeposit(@Valid @RequestBody DepositDto depositDto) throws AccountNotExistingException {
         Deposit deposit = DepositMapper.toEntity(depositDto);
-
         transactionService.doDeposit(deposit);
-
     }
 
 
